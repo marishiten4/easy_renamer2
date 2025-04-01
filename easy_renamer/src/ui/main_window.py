@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
             self.rename_button.setIcon(QIcon("assets/icon.ico"))
         
         right_layout.addWidget(QLabel("プレビュー:"))
-        right_layout.addWidget(self.preview, 2)
+        right_layout.addWidget(self.preview, 3)  # プレビューのサイズを大きくするために伸縮比率を調整
         right_layout.addWidget(self.word_blocks, 1)
         right_layout.addWidget(self.warning_label)
         right_layout.addWidget(self.folder_button)
@@ -52,7 +52,7 @@ class MainWindow(QMainWindow):
         right_layout.addWidget(self.rename_button)
         
         splitter.addWidget(right_widget)
-        splitter.setSizes([300, 700])
+        splitter.setSizes([300, 700])  # 右側の領域を広げる
         
         self.folder_button.clicked.connect(self.select_folder)
         self.refresh_button.clicked.connect(self.refresh_metadata)
@@ -76,7 +76,7 @@ class MainWindow(QMainWindow):
         self.word_blocks.update_candidates(metadata)
     
     def refresh_metadata(self):
-        self.renamer.update_word_map()  # word_mapを更新
+        self.renamer.update_word_map()
         selected_items = self.image_list.list_widget.selectedItems()
         if selected_items:
             self.update_preview(selected_items[0])
