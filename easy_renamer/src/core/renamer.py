@@ -14,14 +14,19 @@ class Renamer:
         new_names = []
         for i, path in enumerate(image_paths):
             metadata = self.get_metadata(path)
-            metadata["連番"] = f"{i+1:03d}"  # 連番を追加
+            sequence_format = "{:03d}"  # デフォルトは3桁
+            if "{連番:" in pattern:
+                start = pattern.index("{連番:") + 6
+                end = pattern.index("}", start)
+                sequence_format = pattern[start:end]  # 例: "03d"
+                pattern = pattern.replace(f"{{連番:{sequence_format}}}", "{連番}")
+            metadata["連番"] = format(i + 1, sequence_format)
             new_name = pattern.format(**metadata)
             char_count = count_fullwidth_chars(new_name)
-            if char_count > 65:  # 全角65文字制限
+            if char_count > 65:
                 new_name = f"[文字数オーバー]{new_name[:62]}..."
             new_names.append((path, new_name + os.path.splitext(path)[1]))
         
-        # 確認ポップアップ
         if parent and QMessageBox.question(parent, "確認", f"{len(new_names)}件のリネームを実行しますか？") != QMessageBox.Yes:
             return
         
