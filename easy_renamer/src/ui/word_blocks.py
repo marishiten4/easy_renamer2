@@ -46,8 +46,7 @@ class WordBlocks(QWidget):
         self.word_list.setFixedHeight(100)  # 高さは適度に
 
         # 事前登録ワードを追加
-        self.predefined_words = set(self.settings.get_search_words())  # 重複を防ぐためにセットを使用
-        for word in self.predefined_words:
+        for word in self.settings.get_search_words():
             self.word_list.addItem(word)
         
         # 横幅を文字数に応じて調整
@@ -94,14 +93,17 @@ class WordBlocks(QWidget):
             item.setSizeHint(QSize(width, height))
     
     def update_candidates(self, metadata):
-        # 現在のワードリストをクリア（事前登録ワードは保持）
+        # 現在のワードリストを取得
         current_words = set()
         for i in range(self.word_list.count()):
             current_words.add(self.word_list.item(i).text())
         
-        # 事前登録ワード以外をクリア
+        # 事前登録ワードを取得
+        predefined_words = set(self.settings.get_search_words())
+        
+        # ワードリストをクリアして事前登録ワードを再追加
         self.word_list.clear()
-        for word in self.predefined_words:
+        for word in predefined_words:
             self.word_list.addItem(word)
         
         # メタデータ一致ワードを追加（空やNoneを除外、重複を防ぐ）
@@ -112,7 +114,7 @@ class WordBlocks(QWidget):
         
         # メタデータ一致ワードを追加（重複しないように）
         for value in metadata_words:
-            if value not in self.predefined_words:  # 事前登録ワードと重複しない場合のみ追加
+            if value not in predefined_words and value not in current_words:
                 self.word_list.addItem(value)
         
         # 横幅を再調整
