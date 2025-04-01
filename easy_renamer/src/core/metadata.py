@@ -1,5 +1,6 @@
-import exifread
 from PIL import Image
+import os
+
 from core.settings import Settings
 
 class MetadataParser:
@@ -9,16 +10,16 @@ class MetadataParser:
     
     def parse(self, image_path):
         try:
-            with open(image_path, 'rb') as f:
-                tags = exifread.process_file(f)
-            metadata = {tag: str(tags[tag]) for tag in tags}
+            with Image.open(image_path) as img:
+                metadata = img.info  # PNGのメタデータを取得
             print(f"Raw metadata for {image_path}: {metadata}")  # デバッグ用
             
             translated = {}
             for key, value in metadata.items():
-                for en_word, jp_word in self.word_map.items():
-                    if en_word in value:
-                        translated[en_word] = jp_word
+                if isinstance(value, str):  # 文字列のみ処理
+                    for en_word, jp_word in self.word_map.items():
+                        if en_word in value:
+                            translated[en_word] = jp_word
             return translated if translated else {"no_match": "一致なし"}
         except Exception as e:
             print(f"Error parsing metadata for {image_path}: {e}")
