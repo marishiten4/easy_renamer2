@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QListWidget, QPushButton, QVBoxLayout, QWidget, QListWidgetItem
+from PyQt5.QtWidgets import QListWidget, QPushButton, QVBoxLayout, QWidget, QListWidgetItem, QApplication  # QApplicationを追加
 from PyQt5.QtCore import pyqtSignal, Qt
 import os
 
@@ -9,7 +9,7 @@ class ImageList(QWidget):
         super().__init__()
         self.layout = QVBoxLayout(self)
         self.list_widget = QListWidget()
-        self.list_widget.setSelectionMode(QListWidget.ExtendedSelection)  # 複数選択を許可
+        self.list_widget.setSelectionMode(QListWidget.ExtendedSelection)
         
         self.prev_button = QPushButton("前へ")
         self.next_button = QPushButton("次へ")
@@ -20,7 +20,7 @@ class ImageList(QWidget):
         self.images = []
         self.page_size = 20
         self.current_page = 0
-        self.last_selected = None  # Shift選択用
+        self.last_selected = None
         
         self.prev_button.clicked.connect(self.prev_page)
         self.next_button.clicked.connect(self.next_page)
@@ -56,21 +56,21 @@ class ImageList(QWidget):
     
     def handle_item_clicked(self, item):
         modifiers = QApplication.keyboardModifiers()
-        if modifiers == Qt.ControlModifier:  # Ctrl+クリック
+        if modifiers == Qt.ControlModifier:
             if item.isSelected():
                 item.setSelected(False)
             else:
                 item.setSelected(True)
-        elif modifiers == Qt.ShiftModifier and self.last_selected is not None:  # Shift+クリック
+        elif modifiers == Qt.ShiftModifier and self.last_selected is not None:
             start = self.list_widget.row(self.last_selected)
             end = self.list_widget.row(item)
             for i in range(min(start, end), max(start, end) + 1):
                 self.list_widget.item(i).setSelected(True)
-        else:  # 単一クリック
+        else:
             self.list_widget.clearSelection()
             item.setSelected(True)
             self.last_selected = item
-        self.itemClicked.emit(item)  # プレビュー更新用
+        self.itemClicked.emit(item)
     
     def selected_images(self):
         return [item.data(32) for item in self.list_widget.selectedItems()]
