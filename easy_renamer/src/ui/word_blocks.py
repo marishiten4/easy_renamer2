@@ -1,11 +1,13 @@
 from PyQt5.QtWidgets import QListWidget, QLineEdit, QVBoxLayout, QWidget, QPushButton, QComboBox, QLabel
 from PyQt5.QtCore import Qt, QMimeData
 from PyQt5.QtGui import QDrag
+from core.settings import Settings
 
 class WordBlocks(QWidget):
     def __init__(self):
         super().__init__()
         self.layout = QVBoxLayout(self)
+        self.settings = Settings()
         
         self.candidates = QListWidget()
         self.candidates.setDragEnabled(True)
@@ -18,7 +20,7 @@ class WordBlocks(QWidget):
         self.pattern_input.dropEvent = self.drop_event
         
         self.template_combo = QComboBox()
-        self.template_combo.addItems(["出品用_キャラ", "テスト_画像", "カスタム"])
+        self.template_combo.addItems(self.settings.get_templates())  # 設定から読み込み
         self.template_combo.currentTextChanged.connect(self.update_pattern)
         
         self.sequence_button = QPushButton("連番設定")
