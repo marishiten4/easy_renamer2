@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLineEdit, QPushButton, QFormLayout, QListWidget, QHBoxLayout
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLineEdit, QPushButton, QFormLayout, QListWidget, QHBoxLayout, QLabel  # QLabelを追加
 from core.settings import Settings
 
 class SettingsDialog(QDialog):
@@ -17,7 +17,7 @@ class SettingsDialog(QDialog):
             self.template_list.addItem(template)
         
         template_layout = QVBoxLayout()
-        template_layout.addWidget(QListWidgetItem("定型文:"))
+        template_layout.addWidget(QLabel("定型文:"))  # QListWidgetItemをQLabelに変更
         template_layout.addWidget(self.template_list)
         template_layout.addWidget(self.template_input)
         template_layout.addWidget(self.template_add_button)
@@ -31,7 +31,7 @@ class SettingsDialog(QDialog):
             self.search_list.addItem(word)
         
         search_layout = QVBoxLayout()
-        search_layout.addWidget(QListWidgetItem("検索用ワード:"))
+        search_layout.addWidget(QLabel("検索用ワード:"))  # QListWidgetItemをQLabelに変更
         search_layout.addWidget(self.search_list)
         search_layout.addWidget(self.search_input)
         search_layout.addWidget(self.search_add_button)
