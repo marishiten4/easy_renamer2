@@ -9,22 +9,20 @@ class WordBlocks(QWidget):
         self.layout = QVBoxLayout(self)
         self.settings = Settings()
         
-        # メタデータ一致ワード
         self.metadata_candidates = QListWidget()
         self.metadata_candidates.setDragEnabled(True)
         self.metadata_candidates.setAcceptDrops(True)
         self.metadata_candidates.doubleClicked.connect(self.insert_candidate)
         
-        # 事前登録ワード
         self.predefined_candidates = QListWidget()
         self.predefined_candidates.setDragEnabled(True)
         self.predefined_candidates.setAcceptDrops(True)
         self.predefined_candidates.doubleClicked.connect(self.insert_candidate)
-        for word in self.settings.get_search_words():  # 検索用ワードを表示
+        for word in self.settings.get_search_words():
             self.predefined_candidates.addItem(word)
         
         self.pattern_input = QLineEdit()
-        self.pattern_input.setPlaceholderText("例: {定型文}_{ワード1}_{連番}")
+        self.pattern_input.setPlaceholderText("例: {定型文} {ワード1} {連番}")  # スペースで区切った例に変更
         self.pattern_input.setAcceptDrops(True)
         self.pattern_input.dropEvent = self.drop_event
         
@@ -52,20 +50,22 @@ class WordBlocks(QWidget):
     def insert_candidate(self, index):
         item = self.metadata_candidates.itemFromIndex(index) or self.predefined_candidates.itemFromIndex(index)
         if item:
-            self.pattern_input.insert(item.text())
+            self.pattern_input.insert(f" {item.text()} ")  # 半角スペースで挟む
     
     def update_pattern(self, template):
         if template != "カスタム":
-            self.pattern_input.setText(f"{template}_{{ワード1}}_{{連番}}")
+            self.pattern_input.setText(template)  # デフォルトパターンを削除し、テンプレートのみ
+        else:
+            self.pattern_input.clear()  # カスタム選択時は空に
     
     def add_sequence(self):
-        self.pattern_input.insert("{連番:03d}")
+        self.pattern_input.insert(" {連番:03d} ")  # 半角スペースで挟む
     
     def drop_event(self, event):
         data = event.mimeData()
         if data.hasText():
-            self.pattern_input.insert(data.text())
+            self.pattern_input.insert(f" {data.text()} ")  # 半角スペースで挟む
         event.accept()
     
     def get_rename_pattern(self):
-        return self.pattern_input.text()
+        return self.pattern_input.text().strip()  # 前後の余分なスペースを削除
