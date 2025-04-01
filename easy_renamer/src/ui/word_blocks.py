@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QListWidget, QLineEdit, QVBoxLayout, QWidget, QPushButton, QComboBox
+from PyQt5.QtWidgets import QListWidget, QLineEdit, QVBoxLayout, QWidget, QPushButton, QComboBox, QLabel  # QLabelを追加
 from PyQt5.QtCore import Qt, QMimeData
 from PyQt5.QtGui import QDrag
 
@@ -28,9 +28,9 @@ class WordBlocks(QWidget):
         self.sequence_button = QPushButton("連番設定")
         self.sequence_button.clicked.connect(self.add_sequence)
         
-        self.layout.addWidget(QLabel("候補ワード:"))
+        self.layout.addWidget(QLabel("候補ワード:"))  # ここでQLabelを使用
         self.layout.addWidget(self.candidates)
-        self.layout.addWidget(QLabel("リネームパターン:"))
+        self.layout.addWidget(QLabel("リネームパターン:"))  # ここでも使用
         self.layout.addWidget(self.template_combo)
         self.layout.addWidget(self.pattern_input)
         self.layout.addWidget(self.sequence_button)
@@ -50,7 +50,7 @@ class WordBlocks(QWidget):
             self.pattern_input.setText(f"{template}_{{ワード1}}_{{連番}}")
     
     def add_sequence(self):
-        self.pattern_input.insert("{連番:03d}")  # 例: 001, 002, ...
+        self.pattern_input.insert("{連番:03d}")
     
     def drop_event(self, event):
         data = event.mimeData()
