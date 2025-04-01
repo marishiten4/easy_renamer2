@@ -44,23 +44,25 @@ class ZoomDialog(QDialog):
             self.image_label.setPixmap(scaled_pixmap)
     
     def zoom_in(self):
-        # 拡大上限を厳密にチェック
-        if self.scale_factor < self.max_scale:
-            self.scale_factor *= 1.2
-            if self.scale_factor > self.max_scale:
-                self.scale_factor = self.max_scale  # 上限を超えないように調整
+        # 現在のスケールに1.2を掛けた値を計算
+        new_scale = self.scale_factor * 1.2
+        # 上限を超えないように制限
+        if new_scale <= self.max_scale:
+            self.scale_factor = new_scale
             self.update_display()
         else:
+            self.scale_factor = self.max_scale  # 上限に固定
             print(f"Maximum scale reached: {self.scale_factor}")
     
     def zoom_out(self):
-        # 縮小下限を厳密にチェック
-        if self.scale_factor > self.min_scale:
-            self.scale_factor /= 1.2
-            if self.scale_factor < self.min_scale:
-                self.scale_factor = self.min_scale  # 下限を下回らないように調整
+        # 現在のスケールに1.2を割った値を計算
+        new_scale = self.scale_factor / 1.2
+        # 下限を下回らないように制限
+        if new_scale >= self.min_scale:
+            self.scale_factor = new_scale
             self.update_display()
         else:
+            self.scale_factor = self.min_scale  # 下限に固定
             print(f"Minimum scale reached: {self.scale_factor}")
     
     def resizeEvent(self, event):
@@ -90,7 +92,7 @@ class Preview(QWidget):
         self.zoom_out_button.clicked.connect(self.zoom_out)
     
     def update_image(self, image_path):
-        self.current_pixmap = QPixmap(image_path)  # 括弧を閉じる
+        self.current_pixmap = QPixmap(image_path)
         self.scale_factor = 1.0
         self.update_display()
     
