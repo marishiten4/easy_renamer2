@@ -57,7 +57,7 @@ class MainWindow(QMainWindow):
         self.folder_button.clicked.connect(self.select_folder)
         self.refresh_button.clicked.connect(self.refresh_metadata)
         self.rename_button.clicked.connect(self.execute_rename)
-        self.settings_button.clicked.connect(self.open_settings)
+        self.settings_button.clicked.connect(self.open_settings)  # ここで open_settings を接続
         self.image_list.itemClicked.connect(self.update_preview)
         self.word_blocks.pattern_input.textChanged.connect(self.check_pattern)
         
