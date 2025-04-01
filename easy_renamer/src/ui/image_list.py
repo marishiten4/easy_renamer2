@@ -1,57 +1,44 @@
-from PyQt5.QtWidgets import QListWidget, QPushButton, QVBoxLayout, QWidget, QListWidgetItem  # QListWidgetItemを追加
-from PyQt5.QtCore import pyqtSignal
-import os  # osモジュールを追加
+from PyQt5.QtWidgets import QLabel, QVBoxLayout, QPushButton, QWidget
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt
 
-class ImageList(QWidget):
-    itemClicked = pyqtSignal(object)
-
+class Preview(QWidget):
     def __init__(self):
         super().__init__()
         self.layout = QVBoxLayout(self)
-        self.list_widget = QListWidget()
-        self.list_widget.setSelectionMode(QListWidget.MultiSelection)
+        self.image_label = QLabel()
+        self.image_label.setScaledContents(True)
+        self.zoom_in_button = QPushButton("拡大")  # 「ズームイン」から「拡大」に変更
+        self.zoom_out_button = QPushButton("縮小")  # 「ズームアウト」から「縮小」に変更
         
-        self.prev_button = QPushButton("前へ")
-        self.next_button = QPushButton("次へ")
-        self.layout.addWidget(self.list_widget)
-        self.layout.addWidget(self.prev_button)
-        self.layout.addWidget(self.next_button)
+        self.layout.addWidget(self.image_label)
+        self.layout.addWidget(self.zoom_in_button)
+        self.layout.addWidget(self.zoom_out_button)
         
-        self.images = []
-        self.page_size = 20
-        self.current_page = 0
+        self.current_pixmap = None
+        self.scale_factor = 1.0
         
-        self.prev_button.clicked.connect(self.prev_page)
-        self.next_button.clicked.connect(self.next_page)
-        self.list_widget.itemClicked.connect(self.itemClicked.emit)
+        self.zoom_in_button.clicked.connect(self.zoom_in)
+        self.zoom_out_button.clicked.connect(self.zoom_out)
     
-    def load_images(self, folder):
-        self.images = []
-        for file in os.listdir(folder):
-            if file.lower().endswith(('.png', '.jpg', '.jpeg')):
-                self.images.append(os.path.join(folder, file))
-        self.show_page()
+    def update_image(self, image_path):
+        self.current_pixmap = QPixmap(image_path)
+        self.scale_factor = 1.0
+        self.update_display()
     
-    def show_page(self):
-        self.list_widget.clear()
-        start = self.current_page * self.page_size
-        end = min(start + self.page_size, len(self.images))
-        for i in range(start, end):
-            item = QListWidgetItem(os.path.basename(self.images[i]))
-            item.setData(32, self.images[i])
-            self.list_widget.addItem(item)
-        self.prev_button.setEnabled(self.current_page > 0)
-        self.next_button.setEnabled(end < len(self.images))
+    def update_display(self):
+        if self.current_pixmap:
+            scaled_pixmap = self.current_pixmap.scaled(
+                int(150 * self.scale_factor),  # 初期サイズを150x150に縮小
+                int(150 * self.scale_factor),
+                Qt.KeepAspectRatio
+            )
+            self.image_label.setPixmap(scaled_pixmap)
     
-    def prev_page(self):
-        if self.current_page > 0:
-            self.current_page -= 1
-            self.show_page()
+    def zoom_in(self):
+        self.scale_factor *= 1.2
+        self.update_display()
     
-    def next_page(self):
-        if (self.current_page + 1) * self.page_size < len(self.images):
-            self.current_page += 1
-            self.show_page()
-    
-    def selected_images(self):
-        return [item.data(32) for item in self.list_widget.selectedItems()]
+    def zoom_out(self):
+        self.scale_factor /= 1.2
+        self.update_display()
