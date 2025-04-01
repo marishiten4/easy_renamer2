@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QListWidget, QPushButton, QVBoxLayout, QWidget, QListWidgetItem  # QListWidgetItemを追加
 from PyQt5.QtCore import pyqtSignal
+import os  # osモジュールを追加
 
 class ImageList(QWidget):
     itemClicked = pyqtSignal(object)
@@ -26,7 +27,6 @@ class ImageList(QWidget):
     
     def load_images(self, folder):
         self.images = []
-        import os
         for file in os.listdir(folder):
             if file.lower().endswith(('.png', '.jpg', '.jpeg')):
                 self.images.append(os.path.join(folder, file))
