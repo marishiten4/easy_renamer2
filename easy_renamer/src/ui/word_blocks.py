@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QListWidget, QLineEdit, QVBoxLayout, QWidget, QPushButton, QComboBox, QLabel
+from PyQt5.QtWidgets import QListWidget, QLineEdit, QVBoxLayout, QWidget, QPushButton, QComboBox, QLabel, QCheckBox
 from PyQt5.QtCore import Qt, QMimeData
 from PyQt5.QtGui import QDrag
 from core.settings import Settings
@@ -13,11 +13,16 @@ class WordBlocks(QWidget):
         self.metadata_candidates.setDragEnabled(True)
         self.metadata_candidates.setAcceptDrops(True)
         self.metadata_candidates.doubleClicked.connect(self.insert_candidate)
+        self.metadata_candidates.setWordWrap(True)  # ワードラップを有効化
+        self.metadata_candidates.setStyleSheet("QListWidget::item { border: 1px solid gray; padding: 5px; margin: 2px; }")  # ブロック形式
         
         self.predefined_candidates = QListWidget()
         self.predefined_candidates.setDragEnabled(True)
         self.predefined_candidates.setAcceptDrops(True)
         self.predefined_candidates.doubleClicked.connect(self.insert_candidate)
+        self.predefined_candidates.setWordWrap(True)  # ワードラップを有効化
+        self.predefined_candidates.setStyleSheet("QListWidget::item { border: 1px solid gray; padding: 5px; margin: 2px; }")  # ブロック形式
+        
         for word in self.settings.get_search_words():
             self.predefined_candidates.addItem(word)
         
@@ -30,8 +35,11 @@ class WordBlocks(QWidget):
         self.template_combo.addItems(self.settings.get_templates())
         self.template_combo.currentTextChanged.connect(self.update_pattern)
         
-        self.sequence_button = QPushButton("連番設定")
+        self.sequence_input = QLineEdit()
+        self.sequence_input.setPlaceholderText("連番形式（例: 連番:03d）")
+        self.sequence_button = QPushButton("連番追加")
         self.sequence_button.clicked.connect(self.add_sequence)
+        self.sequence_position = QCheckBox("先頭に追加")
         
         self.layout.addWidget(QLabel("メタデータ一致ワード:"))
         self.layout.addWidget(self.metadata_candidates)
@@ -40,6 +48,9 @@ class WordBlocks(QWidget):
         self.layout.addWidget(QLabel("リネームパターン:"))
         self.layout.addWidget(self.template_combo)
         self.layout.addWidget(self.pattern_input)
+        self.layout.addWidget(QLabel("連番設定:"))
+        self.layout.addWidget(self.sequence_input)
+        self.layout.addWidget(self.sequence_position)
         self.layout.addWidget(self.sequence_button)
     
     def update_candidates(self, metadata):
@@ -53,11 +64,19 @@ class WordBlocks(QWidget):
             self.pattern_input.insert(f" {item.text()} ")
     
     def update_pattern(self, template):
-        # テンプレート選択時に何も入力しない
-        pass
+        if template != "カスタム":
+            self.pattern_input.setText(template)  # テンプレートを選択時に反映
+        else:
+            self.pattern_input.clear()
     
     def add_sequence(self):
-        self.pattern_input.insert(" {連番:03d} ")
+        sequence = self.sequence_input.text() or "連番:03d"
+        sequence_text = f"{{{sequence}}}"
+        if self.sequence_position.isChecked():
+            current_text = self.pattern_input.text()
+            self.pattern_input.setText(f"{sequence_text} {current_text}".strip())
+        else:
+            self.pattern_input.insert(f" {sequence_text} ")
     
     def drop_event(self, event):
         data = event.mimeData()
