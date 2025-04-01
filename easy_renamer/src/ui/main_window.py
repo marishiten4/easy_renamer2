@@ -1,8 +1,10 @@
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QLabel
 from ui.image_list import ImageList
 from ui.preview import Preview
 from ui.word_blocks import WordBlocks
+from ui.settings_dialog import SettingsDialog
 from core.renamer import Renamer
+from PyQt5.QtGui import QPalette, QColor
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -10,33 +12,35 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Easy Renamer")
         self.resize(800, 600)
         
-        # レイアウト設定
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         self.layout = QHBoxLayout(self.central_widget)
         
-        # 左側: 画像リスト
         self.image_list = ImageList()
         self.layout.addWidget(self.image_list, 1)
         
-        # 右側: プレビューと操作エリア
         right_layout = QVBoxLayout()
         self.preview = Preview()
         self.word_blocks = WordBlocks()
         self.rename_button = QPushButton("リネーム実行")
         self.folder_button = QPushButton("フォルダ選択")
+        self.settings_button = QPushButton("設定")
+        self.warning_label = QLabel("")  # 文字数オーバー警告用
         
         right_layout.addWidget(self.preview, 2)
         right_layout.addWidget(self.word_blocks, 1)
+        right_layout.addWidget(self.warning_label)
         right_layout.addWidget(self.folder_button)
+        right_layout.addWidget(self.settings_button)
         right_layout.addWidget(self.rename_button)
         
         self.layout.addLayout(right_layout, 2)
         
-        # イベント接続
         self.folder_button.clicked.connect(self.select_folder)
         self.rename_button.clicked.connect(self.execute_rename)
+        self.settings_button.clicked.connect(self.open_settings)
         self.image_list.itemClicked.connect(self.update_preview)
+        self.word_blocks.pattern_input.textChanged.connect(self.check_pattern)
         
         self.renamer = Renamer()
 
@@ -46,11 +50,24 @@ class MainWindow(QMainWindow):
             self.image_list.load_images(folder)
     
     def update_preview(self, item):
-        image_path = item.data(32)  # ユーザー定義データを取得
+        image_path = item.data(32)
         self.preview.update_image(image_path)
         metadata = self.renamer.get_metadata(image_path)
         self.word_blocks.update_candidates(metadata)
     
+    def check_pattern(self):
+        pattern = self.word_blocks.get_rename_pattern()
+        char_count = count_fullwidth_chars(pattern)
+        if char_count > 65:
+            self.warning_label.setText("警告: 文字数が65文字を超えています")
+            self.warning_label.setStyleSheet("color: red;")
+        else:
+            self.warning_label.clear()
+    
     def execute_rename(self):
         selected_images = self.image_list.selected_images()
-        self.renamer.rename_files(selected_images, self.word_blocks.get_rename_pattern())
+        self.renamer.rename_files(selected_images, self.word_blocks.get_rename_pattern(), self)
+    
+    def open_settings(self):
+        dialog = SettingsDialog(self)
+        dialog.exec_()
