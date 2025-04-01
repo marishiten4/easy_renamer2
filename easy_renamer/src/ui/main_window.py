@@ -32,11 +32,13 @@ class MainWindow(QMainWindow):
         self.word_blocks = WordBlocks()
         self.warning_label = QLabel("")
         self.folder_button = QPushButton("フォルダ選択")
+        self.refresh_button = QPushButton("再読み込み")  # 再読み込みボタンを追加
         self.settings_button = QPushButton("設定")
         self.rename_button = QPushButton("リネーム実行")
         
         if os.path.exists("assets/icon.ico"):
             self.folder_button.setIcon(QIcon("assets/icon.ico"))
+            self.refresh_button.setIcon(QIcon("assets/icon.ico"))
             self.settings_button.setIcon(QIcon("assets/icon.ico"))
             self.rename_button.setIcon(QIcon("assets/icon.ico"))
         
@@ -45,6 +47,7 @@ class MainWindow(QMainWindow):
         right_layout.addWidget(self.word_blocks, 1)
         right_layout.addWidget(self.warning_label)
         right_layout.addWidget(self.folder_button)
+        right_layout.addWidget(self.refresh_button)
         right_layout.addWidget(self.settings_button)
         right_layout.addWidget(self.rename_button)
         
@@ -52,6 +55,7 @@ class MainWindow(QMainWindow):
         splitter.setSizes([300, 700])
         
         self.folder_button.clicked.connect(self.select_folder)
+        self.refresh_button.clicked.connect(self.refresh_metadata)  # 再読み込みボタンの接続
         self.rename_button.clicked.connect(self.execute_rename)
         self.settings_button.clicked.connect(self.open_settings)
         self.image_list.itemClicked.connect(self.update_preview)
@@ -68,8 +72,13 @@ class MainWindow(QMainWindow):
         image_path = item.data(32)
         self.preview.update_image(image_path)
         metadata = self.renamer.get_metadata(image_path)
-        print(f"Translated metadata: {metadata}")  # デバッグ用
+        print(f"Translated metadata: {metadata}")
         self.word_blocks.update_candidates(metadata)
+    
+    def refresh_metadata(self):
+        selected_items = self.image_list.list_widget.selectedItems()
+        if selected_items:
+            self.update_preview(selected_items[0])  # 選択中の最初のアイテムを再読み込み
     
     def check_pattern(self):
         pattern = self.word_blocks.get_rename_pattern()
@@ -86,4 +95,5 @@ class MainWindow(QMainWindow):
     
     def open_settings(self):
         dialog = SettingsDialog(self)
+        dialog.settings_updated.connect(self.refresh_metadata)  # シグナルを接続
         dialog.exec_()
