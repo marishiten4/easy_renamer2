@@ -8,8 +8,8 @@ class Preview(QWidget):
         self.layout = QVBoxLayout(self)
         self.image_label = QLabel()
         self.image_label.setScaledContents(True)
-        self.zoom_in_button = QPushButton("ズームイン")
-        self.zoom_out_button = QPushButton("ズームアウト")
+        self.zoom_in_button = QPushButton("拡大")  # 「ズームイン」から「拡大」に変更
+        self.zoom_out_button = QPushButton("縮小")  # 「ズームアウト」から「縮小」に変更
         
         self.layout.addWidget(self.image_label)
         self.layout.addWidget(self.zoom_in_button)
@@ -29,8 +29,8 @@ class Preview(QWidget):
     def update_display(self):
         if self.current_pixmap:
             scaled_pixmap = self.current_pixmap.scaled(
-                int(300 * self.scale_factor),
-                int(300 * self.scale_factor),
+                int(150 * self.scale_factor),  # 初期サイズを150x150に縮小
+                int(150 * self.scale_factor),
                 Qt.KeepAspectRatio
             )
             self.image_label.setPixmap(scaled_pixmap)
