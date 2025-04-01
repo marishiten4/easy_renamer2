@@ -1,32 +1,44 @@
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QLabel
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QLabel, QSplitter
+from PyQt5.QtGui import QPalette, QColor, QIcon
 from ui.image_list import ImageList
 from ui.preview import Preview
 from ui.word_blocks import WordBlocks
 from ui.settings_dialog import SettingsDialog
 from core.renamer import Renamer
-from PyQt5.QtGui import QPalette, QColor
+from utils.helpers import count_fullwidth_chars
+import os
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Easy Renamer")
-        self.resize(800, 600)
+        self.resize(1000, 700)
+        if os.path.exists("assets/icon.ico"):
+            self.setWindowIcon(QIcon("assets/icon.ico"))
         
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
-        self.layout = QHBoxLayout(self.central_widget)
+        self.main_layout = QHBoxLayout(self.central_widget)
         
+        # スプリッターで左右を調整可能に
+        splitter = QSplitter()
+        self.main_layout.addWidget(splitter)
+        
+        # 左側: 画像リスト
         self.image_list = ImageList()
-        self.layout.addWidget(self.image_list, 1)
+        splitter.addWidget(self.image_list)
         
-        right_layout = QVBoxLayout()
+        # 右側: プレビューと操作エリア
+        right_widget = QWidget()
+        right_layout = QVBoxLayout(right_widget)
         self.preview = Preview()
         self.word_blocks = WordBlocks()
-        self.rename_button = QPushButton("リネーム実行")
+        self.warning_label = QLabel("")
         self.folder_button = QPushButton("フォルダ選択")
         self.settings_button = QPushButton("設定")
-        self.warning_label = QLabel("")  # 文字数オーバー警告用
+        self.rename_button = QPushButton("リネーム実行")
         
+        right_layout.addWidget(QLabel("プレビュー:"))
         right_layout.addWidget(self.preview, 2)
         right_layout.addWidget(self.word_blocks, 1)
         right_layout.addWidget(self.warning_label)
@@ -34,8 +46,10 @@ class MainWindow(QMainWindow):
         right_layout.addWidget(self.settings_button)
         right_layout.addWidget(self.rename_button)
         
-        self.layout.addLayout(right_layout, 2)
+        splitter.addWidget(right_widget)
+        splitter.setSizes([300, 700])  # 初期幅を設定
         
+        # イベント接続
         self.folder_button.clicked.connect(self.select_folder)
         self.rename_button.clicked.connect(self.execute_rename)
         self.settings_button.clicked.connect(self.open_settings)
