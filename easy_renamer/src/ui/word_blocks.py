@@ -22,7 +22,7 @@ class WordBlocks(QWidget):
             self.predefined_candidates.addItem(word)
         
         self.pattern_input = QLineEdit()
-        self.pattern_input.setPlaceholderText("例: {定型文} {ワード1} {連番}")  # スペースで区切った例に変更
+        self.pattern_input.setPlaceholderText("例: {定型文} {ワード1} {連番}")
         self.pattern_input.setAcceptDrops(True)
         self.pattern_input.dropEvent = self.drop_event
         
@@ -50,22 +50,20 @@ class WordBlocks(QWidget):
     def insert_candidate(self, index):
         item = self.metadata_candidates.itemFromIndex(index) or self.predefined_candidates.itemFromIndex(index)
         if item:
-            self.pattern_input.insert(f" {item.text()} ")  # 半角スペースで挟む
+            self.pattern_input.insert(f" {item.text()} ")
     
     def update_pattern(self, template):
-        if template != "カスタム":
-            self.pattern_input.setText(template)  # デフォルトパターンを削除し、テンプレートのみ
-        else:
-            self.pattern_input.clear()  # カスタム選択時は空に
+        # テンプレート選択時に何も入力しない
+        pass
     
     def add_sequence(self):
-        self.pattern_input.insert(" {連番:03d} ")  # 半角スペースで挟む
+        self.pattern_input.insert(" {連番:03d} ")
     
     def drop_event(self, event):
         data = event.mimeData()
         if data.hasText():
-            self.pattern_input.insert(f" {data.text()} ")  # 半角スペースで挟む
+            self.pattern_input.insert(f" {data.text()} ")
         event.accept()
     
     def get_rename_pattern(self):
-        return self.pattern_input.text().strip()  # 前後の余分なスペースを削除
+        return self.pattern_input.text().strip()
