@@ -29,18 +29,24 @@ class ZoomDialog(QDialog):
     
     def update_display(self):
         if self.current_pixmap:
+            print(f"Updating display with scale_factor: {self.scale_factor}")  # デバッグ出力
             label_size = self.image_label.size()
+            # まずウィジェットのサイズに合わせてスケーリング
             scaled_pixmap = self.current_pixmap.scaled(
                 label_size,
                 Qt.KeepAspectRatio,
                 Qt.SmoothTransformation
             )
+            # スケールファクターを適用
+            final_width = int(scaled_pixmap.width() * self.scale_factor)
+            final_height = int(scaled_pixmap.height() * self.scale_factor)
             scaled_pixmap = scaled_pixmap.scaled(
-                int(scaled_pixmap.width() * self.scale_factor),
-                int(scaled_pixmap.height() * self.scale_factor),
+                final_width,
+                final_height,
                 Qt.KeepAspectRatio,
                 Qt.SmoothTransformation
             )
+            print(f"Scaled pixmap size: {scaled_pixmap.width()}x{scaled_pixmap.height()}")  # デバッグ出力
             self.image_label.setPixmap(scaled_pixmap)
     
     def zoom_in(self):
@@ -50,11 +56,11 @@ class ZoomDialog(QDialog):
         # 上限チェック
         if new_scale <= self.max_scale:
             self.scale_factor = new_scale
-            print(f"After zoom_in: scale_factor = {self.scale_factor}")
-            self.update_display()
         else:
             self.scale_factor = self.max_scale
             print(f"Maximum scale reached: {self.scale_factor}")
+        print(f"After zoom_in: scale_factor = {self.scale_factor}")  # デバッグ出力
+        self.update_display()
     
     def zoom_out(self):
         print(f"Before zoom_out: scale_factor = {self.scale_factor}")  # デバッグ出力
@@ -63,11 +69,11 @@ class ZoomDialog(QDialog):
         # 下限チェック
         if new_scale >= self.min_scale:
             self.scale_factor = new_scale
-            print(f"After zoom_out: scale_factor = {self.scale_factor}")
-            self.update_display()
         else:
             self.scale_factor = self.min_scale
             print(f"Minimum scale reached: {self.scale_factor}")
+        print(f"After zoom_out: scale_factor = {self.scale_factor}")  # デバッグ出力
+        self.update_display()
     
     def resizeEvent(self, event):
         self.update_display()
