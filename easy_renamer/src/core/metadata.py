@@ -5,7 +5,7 @@ from core.settings import Settings
 class MetadataParser:
     def __init__(self):
         self.settings = Settings()
-        self.word_map = self.settings.load_word_map()  # {"short hair": "短髪", ...}
+        self.word_map = self.settings.get_word_map()  # "load_word_map" を "get_word_map" に変更
     
     def parse(self, image_path):
         with open(image_path, 'rb') as f:
