@@ -80,6 +80,8 @@ class MainWindow(QMainWindow):
         selected_items = self.image_list.list_widget.selectedItems()
         if selected_items:
             self.update_preview(selected_items[0])
+        else:
+            print("No selected items to refresh.")
     
     def check_pattern(self):
         pattern = self.word_blocks.get_rename_pattern()
