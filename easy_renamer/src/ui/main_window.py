@@ -32,7 +32,7 @@ class MainWindow(QMainWindow):
         self.word_blocks = WordBlocks()
         self.warning_label = QLabel("")
         self.folder_button = QPushButton("フォルダ選択")
-        self.refresh_button = QPushButton("再読み込み")  # 再読み込みボタンを追加
+        self.refresh_button = QPushButton("再読み込み")
         self.settings_button = QPushButton("設定")
         self.rename_button = QPushButton("リネーム実行")
         
@@ -55,7 +55,7 @@ class MainWindow(QMainWindow):
         splitter.setSizes([300, 700])
         
         self.folder_button.clicked.connect(self.select_folder)
-        self.refresh_button.clicked.connect(self.refresh_metadata)  # 再読み込みボタンの接続
+        self.refresh_button.clicked.connect(self.refresh_metadata)
         self.rename_button.clicked.connect(self.execute_rename)
         self.settings_button.clicked.connect(self.open_settings)
         self.image_list.itemClicked.connect(self.update_preview)
@@ -76,9 +76,10 @@ class MainWindow(QMainWindow):
         self.word_blocks.update_candidates(metadata)
     
     def refresh_metadata(self):
+        self.renamer.update_word_map()  # word_mapを更新
         selected_items = self.image_list.list_widget.selectedItems()
         if selected_items:
-            self.update_preview(selected_items[0])  # 選択中の最初のアイテムを再読み込み
+            self.update_preview(selected_items[0])
     
     def check_pattern(self):
         pattern = self.word_blocks.get_rename_pattern()
@@ -95,5 +96,5 @@ class MainWindow(QMainWindow):
     
     def open_settings(self):
         dialog = SettingsDialog(self)
-        dialog.settings_updated.connect(self.refresh_metadata)  # シグナルを接続
+        dialog.settings_updated.connect(self.refresh_metadata)
         dialog.exec_()
