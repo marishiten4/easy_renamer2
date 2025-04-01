@@ -20,15 +20,12 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.central_widget)
         self.main_layout = QHBoxLayout(self.central_widget)
         
-        # スプリッターで左右を調整可能に
         splitter = QSplitter()
         self.main_layout.addWidget(splitter)
         
-        # 左側: 画像リスト
         self.image_list = ImageList()
         splitter.addWidget(self.image_list)
         
-        # 右側: プレビューと操作エリア
         right_widget = QWidget()
         right_layout = QVBoxLayout(right_widget)
         self.preview = Preview()
@@ -37,6 +34,12 @@ class MainWindow(QMainWindow):
         self.folder_button = QPushButton("フォルダ選択")
         self.settings_button = QPushButton("設定")
         self.rename_button = QPushButton("リネーム実行")
+        
+        # アイコンをボタンに設定
+        if os.path.exists("assets/icon.ico"):
+            self.folder_button.setIcon(QIcon("assets/icon.ico"))
+            self.settings_button.setIcon(QIcon("assets/icon.ico"))
+            self.rename_button.setIcon(QIcon("assets/icon.ico"))
         
         right_layout.addWidget(QLabel("プレビュー:"))
         right_layout.addWidget(self.preview, 2)
@@ -47,9 +50,8 @@ class MainWindow(QMainWindow):
         right_layout.addWidget(self.rename_button)
         
         splitter.addWidget(right_widget)
-        splitter.setSizes([300, 700])  # 初期幅を設定
+        splitter.setSizes([300, 700])
         
-        # イベント接続
         self.folder_button.clicked.connect(self.select_folder)
         self.rename_button.clicked.connect(self.execute_rename)
         self.settings_button.clicked.connect(self.open_settings)
