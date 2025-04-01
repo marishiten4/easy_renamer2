@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QListWidget, QLineEdit, QVBoxLayout, QWidget, QPushButton, QComboBox, QLabel, QCheckBox
+from PyQt5.QtWidgets import QListWidget, QLineEdit, QVBoxLayout, QWidget, QPushButton, QComboBox, QLabel, QCheckBox, QHBoxLayout
 from PyQt5.QtCore import Qt, QMimeData
-from PyQt5.QtGui import QDrag
+from PyQt5.QtGui import QDrag, QFont
 from core.settings import Settings
 
 class WordBlocks(QWidget):
@@ -9,22 +9,58 @@ class WordBlocks(QWidget):
         self.layout = QVBoxLayout(self)
         self.settings = Settings()
         
+        # メタデータ一致ワードと事前登録ワードを横並びにするためのレイアウト
+        word_blocks_layout = QHBoxLayout()
+
+        # メタデータ一致ワード
         self.metadata_candidates = QListWidget()
         self.metadata_candidates.setDragEnabled(True)
         self.metadata_candidates.setAcceptDrops(True)
         self.metadata_candidates.doubleClicked.connect(self.insert_candidate)
-        self.metadata_candidates.setWordWrap(True)  # ワードラップを有効化
-        self.metadata_candidates.setStyleSheet("QListWidget::item { border: 1px solid gray; padding: 5px; margin: 2px; }")  # ブロック形式
-        
+        self.metadata_candidates.setWordWrap(True)
+        # フォントサイズを小さくし、アイテムの高さを調整
+        font = QFont()
+        font.setPointSize(8)
+        self.metadata_candidates.setFont(font)
+        self.metadata_candidates.setStyleSheet("""
+            QListWidget::item { 
+                border: 1px solid gray; 
+                padding: 2px; 
+                margin: 1px; 
+                height: 15px; 
+            }
+        """)
+        # サイズを調整
+        self.metadata_candidates.setFixedHeight(100)  # 高さを小さく
+        self.metadata_candidates.setMinimumWidth(150)
+
+        # 事前登録ワード
         self.predefined_candidates = QListWidget()
         self.predefined_candidates.setDragEnabled(True)
         self.predefined_candidates.setAcceptDrops(True)
         self.predefined_candidates.doubleClicked.connect(self.insert_candidate)
-        self.predefined_candidates.setWordWrap(True)  # ワードラップを有効化
-        self.predefined_candidates.setStyleSheet("QListWidget::item { border: 1px solid gray; padding: 5px; margin: 2px; }")  # ブロック形式
-        
+        self.predefined_candidates.setWordWrap(True)
+        self.predefined_candidates.setFont(font)
+        self.predefined_candidates.setStyleSheet("""
+            QListWidget::item { 
+                border: 1px solid gray; 
+                padding: 2px; 
+                margin: 1px; 
+                height: 15px; 
+            }
+        """)
+        self.predefined_candidates.setFixedHeight(100)  # 高さを小さく
+        self.predefined_candidates.setMinimumWidth(150)
+
+        # 事前登録ワードを追加
         for word in self.settings.get_search_words():
             self.predefined_candidates.addItem(word)
+        
+        # 横並びレイアウトに追加
+        word_blocks_layout.addWidget(QLabel("メタデータ一致ワード:"))
+        word_blocks_layout.addWidget(self.metadata_candidates)
+        word_blocks_layout.addWidget(QLabel("事前登録ワード:"))
+        word_blocks_layout.addWidget(self.predefined_candidates)
         
         self.pattern_input = QLineEdit()
         self.pattern_input.setPlaceholderText("例: {定型文} {ワード1} {連番}")
@@ -41,10 +77,8 @@ class WordBlocks(QWidget):
         self.sequence_button.clicked.connect(self.add_sequence)
         self.sequence_position = QCheckBox("先頭に追加")
         
-        self.layout.addWidget(QLabel("メタデータ一致ワード:"))
-        self.layout.addWidget(self.metadata_candidates)
-        self.layout.addWidget(QLabel("事前登録ワード:"))
-        self.layout.addWidget(self.predefined_candidates)
+        # 全体のレイアウトに追加
+        self.layout.addLayout(word_blocks_layout)
         self.layout.addWidget(QLabel("リネームパターン:"))
         self.layout.addWidget(self.template_combo)
         self.layout.addWidget(self.pattern_input)
@@ -65,7 +99,7 @@ class WordBlocks(QWidget):
     
     def update_pattern(self, template):
         if template != "カスタム":
-            self.pattern_input.setText(template)  # テンプレートを選択時に反映
+            self.pattern_input.setText(template)
         else:
             self.pattern_input.clear()
     
