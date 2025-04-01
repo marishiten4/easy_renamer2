@@ -12,7 +12,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Easy Renamer")
-        self.resize(1000, 700)
+        self.resize(1200, 800)  # ウィンドウの初期サイズを大きく
         if os.path.exists("assets/icon.ico"):
             self.setWindowIcon(QIcon("assets/icon.ico"))
         
@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
             self.rename_button.setIcon(QIcon("assets/icon.ico"))
         
         right_layout.addWidget(QLabel("プレビュー:"))
-        right_layout.addWidget(self.preview, 3)  # プレビューのサイズを大きくするために伸縮比率を調整
+        right_layout.addWidget(self.preview, 5)  # プレビューのサイズをさらに大きく
         right_layout.addWidget(self.word_blocks, 1)
         right_layout.addWidget(self.warning_label)
         right_layout.addWidget(self.folder_button)
@@ -52,7 +52,7 @@ class MainWindow(QMainWindow):
         right_layout.addWidget(self.rename_button)
         
         splitter.addWidget(right_widget)
-        splitter.setSizes([300, 700])  # 右側の領域を広げる
+        splitter.setSizes([300, 900])  # 右側の領域をさらに広げる
         
         self.folder_button.clicked.connect(self.select_folder)
         self.refresh_button.clicked.connect(self.refresh_metadata)
