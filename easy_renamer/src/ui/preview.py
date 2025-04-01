@@ -18,9 +18,9 @@ class ZoomDialog(QDialog):
         
         self.current_pixmap = pixmap
         self.scale_factor = 1.0
-        self.max_scale = 5.0  # 拡大上限
+        self.max_scale = 3.0  # 拡大上限を小さく（5.0 → 3.0）
         self.min_scale = 0.2  # 縮小下限
-        self.max_pixel_size = 10000  # ピクセルサイズの上限（幅または高さがこの値を超えないように）
+        self.max_pixel_size = 5000  # ピクセルサイズの上限を小さく（10000 → 5000）
         
         self.zoom_in_button.clicked.connect(self.zoom_in)
         self.zoom_out_button.clicked.connect(self.zoom_out)
@@ -44,7 +44,7 @@ class ZoomDialog(QDialog):
             
             # ピクセルサイズが上限を超えないように制限
             if final_width > self.max_pixel_size or final_height > self.max_pixel_size:
-                scale_down = min(self.max_pixel_size / final_width, self.max_pixel_size / final_height)  # 括弧を閉じる
+                scale_down = min(self.max_pixel_size / final_width, self.max_pixel_size / final_height)
                 final_width = int(final_width * scale_down)
                 final_height = int(final_height * scale_down)
                 print(f"Pixel size limited: {final_width}x{final_height}")  # デバッグ出力
@@ -104,7 +104,7 @@ class Preview(QWidget):
         
         self.current_pixmap = None
         self.scale_factor = 1.0
-        self.max_scale = 5.0
+        self.max_scale = 3.0  # 通常のプレビューも上限を小さく
         self.min_scale = 0.2
         
         self.zoom_in_button.clicked.connect(self.open_zoom_dialog)
