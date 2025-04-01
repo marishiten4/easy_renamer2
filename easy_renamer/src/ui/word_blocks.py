@@ -16,7 +16,7 @@ class WordBlocks(QWidget):
         font = QFont()
         font.setPointSize(8)
         font_metrics = QFontMetrics(font)
-        item_height = font_metrics.height() + 2
+        item_height = font_metrics.height() + 4
 
         # 統合されたワードリスト（メタデータ一致ワードと事前登録ワードを1つに）
         self.word_list = QListWidget()
@@ -28,8 +28,8 @@ class WordBlocks(QWidget):
         self.word_list.setStyleSheet(f"""
             QListWidget::item {{ 
                 border: 1px solid gray; 
-                padding: 2px; 
-                margin: 1px; 
+                padding: 4px; 
+                margin: 2px; 
                 height: {item_height}px; 
             }}
         """)
@@ -78,8 +78,8 @@ class WordBlocks(QWidget):
         for i in range(list_widget.count()):
             item = list_widget.item(i)
             text = item.text()
-            width = font_metrics.width(text) + 12  # パディングを増やして文字が切れないように
-            height = font_metrics.height() + 4  # 高さをフォントサイズに合わせて調整
+            width = font_metrics.width(text) + 20  # パディングをさらに増やして文字が切れないように
+            height = font_metrics.height() + 8  # 高さを調整
             item.setSizeHint(QSize(width, height))
     
     def update_candidates(self, metadata):
