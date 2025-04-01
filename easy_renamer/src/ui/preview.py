@@ -25,7 +25,7 @@ class ZoomDialog(QDialog):
         self.zoom_out_button.clicked.connect(self.zoom_out)
         
         self.update_display()
-        self.resize(600, 600)  # ポップアップの初期サイズ
+        self.resize(600, 600)
     
     def update_display(self):
         if self.current_pixmap:
@@ -44,14 +44,22 @@ class ZoomDialog(QDialog):
             self.image_label.setPixmap(scaled_pixmap)
     
     def zoom_in(self):
-        if self.scale_factor < self.max_scale:
-            self.scale_factor *= 1.2
+        # 拡大上限を厳密にチェック
+        new_scale = self.scale_factor * 1.2
+        if new_scale <= self.max_scale:
+            self.scale_factor = new_scale
             self.update_display()
+        else:
+            print(f"Maximum scale reached: {self.scale_factor}")
     
     def zoom_out(self):
-        if self.scale_factor > self.min_scale:
-            self.scale_factor /= 1.2
+        # 縮小下限を厳密にチェック
+        new_scale = self.scale_factor / 1.2
+        if new_scale >= self.min_scale:
+            self.scale_factor = new_scale
             self.update_display()
+        else:
+            print(f"Minimum scale reached: {self.scale_factor}")
     
     def resizeEvent(self, event):
         self.update_display()
@@ -73,8 +81,8 @@ class Preview(QWidget):
         
         self.current_pixmap = None
         self.scale_factor = 1.0
-        self.max_scale = 5.0  # 拡大上限
-        self.min_scale = 0.2  # 縮小下限
+        self.max_scale = 5.0
+        self.min_scale = 0.2
         
         self.zoom_in_button.clicked.connect(self.open_zoom_dialog)
         self.zoom_out_button.clicked.connect(self.zoom_out)
@@ -86,7 +94,6 @@ class Preview(QWidget):
     
     def update_display(self):
         if self.current_pixmap:
-            # ウィジェットのサイズに合わせてスケーリング（アスペクト比を保持）
             label_size = self.image_label.size()
             scaled_pixmap = self.current_pixmap.scaled(
                 label_size,
