@@ -7,6 +7,10 @@ class Renamer:
     def __init__(self):
         self.metadata_parser = MetadataParser()
     
+    def update_word_map(self):
+        """word_mapを更新"""
+        self.metadata_parser.update_word_map()
+    
     def get_metadata(self, image_path):
         return self.metadata_parser.parse(image_path)
     
@@ -14,7 +18,7 @@ class Renamer:
         new_names = []
         for i, path in enumerate(image_paths):
             metadata = self.get_metadata(path)
-            sequence_format = "{:03d}"  # デフォルト
+            sequence_format = "{:03d}"
             if "{連番:" in pattern:
                 start = pattern.index("{連番:") + 6
                 end = pattern.index("}", start)
