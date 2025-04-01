@@ -1,6 +1,9 @@
 from PyQt5.QtWidgets import QListWidget, QPushButton, QVBoxLayout, QWidget
+from PyQt5.QtCore import pyqtSignal  # シグナルを定義するために追加
 
 class ImageList(QWidget):
+    itemClicked = pyqtSignal(object)  # シグナルを定義
+
     def __init__(self):
         super().__init__()
         self.layout = QVBoxLayout(self)
@@ -19,6 +22,8 @@ class ImageList(QWidget):
         
         self.prev_button.clicked.connect(self.prev_page)
         self.next_button.clicked.connect(self.next_page)
+        # QListWidgetのitemClickedシグナルをImageListのシグナルに接続
+        self.list_widget.itemClicked.connect(self.itemClicked.emit)
     
     def load_images(self, folder):
         self.images = []
