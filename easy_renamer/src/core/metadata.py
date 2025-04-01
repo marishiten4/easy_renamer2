@@ -15,6 +15,7 @@ class MetadataParser:
             print(f"Raw metadata from PIL for {image_path}: {metadata}")
             
             translated = {}
+            # メタデータの解析
             for key, value in metadata.items():
                 if isinstance(value, str):
                     for en_word, jp_word in self.word_map.items():
@@ -23,11 +24,13 @@ class MetadataParser:
             
             # メタデータが空の場合、ファイル名から推測
             if not translated:
-                filename = os.path.splitext(os.path.basename(image_path))[0]
+                filename = os.path.splitext(os.path.basename(image_path))[0].lower()
                 print(f"Extracting from filename: {filename}")
-                for en_word, jp_word in self.word_map.items():
-                    if en_word in filename:
-                        translated[en_word] = jp_word
+                words = filename.split()  # スペースで分割
+                for word in words:
+                    for en_word, jp_word in self.word_map.items():
+                        if en_word in word:
+                            translated[en_word] = jp_word
             
             return translated if translated else {"no_match": "一致なし"}
         except Exception as e:
