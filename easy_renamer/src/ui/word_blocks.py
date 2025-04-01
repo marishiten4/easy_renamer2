@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QListWidget, QLineEdit, QVBoxLayout, QWidget, QPushButton, QComboBox, QLabel, QCheckBox, QHBoxLayout
 from PyQt5.QtCore import Qt, QMimeData
-from PyQt5.QtGui import QDrag, QFont
+from PyQt5.QtGui import QDrag, QFont, QFontMetrics
 from core.settings import Settings
 
 class WordBlocks(QWidget):
@@ -9,8 +9,13 @@ class WordBlocks(QWidget):
         self.layout = QVBoxLayout(self)
         self.settings = Settings()
         
-        # メタデータ一致ワードと事前登録ワードを横並びにするためのレイアウト
         word_blocks_layout = QHBoxLayout()
+
+        # フォントサイズを設定
+        font = QFont()
+        font.setPointSize(8)
+        font_metrics = QFontMetrics(font)
+        item_height = font_metrics.height() + 4  # フォントの高さにパディングを追加
 
         # メタデータ一致ワード
         self.metadata_candidates = QListWidget()
@@ -18,20 +23,16 @@ class WordBlocks(QWidget):
         self.metadata_candidates.setAcceptDrops(True)
         self.metadata_candidates.doubleClicked.connect(self.insert_candidate)
         self.metadata_candidates.setWordWrap(True)
-        # フォントサイズを小さくし、アイテムの高さを調整
-        font = QFont()
-        font.setPointSize(8)
         self.metadata_candidates.setFont(font)
-        self.metadata_candidates.setStyleSheet("""
-            QListWidget::item { 
+        self.metadata_candidates.setStyleSheet(f"""
+            QListWidget::item {{ 
                 border: 1px solid gray; 
                 padding: 2px; 
                 margin: 1px; 
-                height: 15px; 
-            }
+                height: {item_height}px; 
+            }}
         """)
-        # サイズを調整
-        self.metadata_candidates.setFixedHeight(100)  # 高さを小さく
+        self.metadata_candidates.setFixedHeight(100)
         self.metadata_candidates.setMinimumWidth(150)
 
         # 事前登録ワード
@@ -41,22 +42,20 @@ class WordBlocks(QWidget):
         self.predefined_candidates.doubleClicked.connect(self.insert_candidate)
         self.predefined_candidates.setWordWrap(True)
         self.predefined_candidates.setFont(font)
-        self.predefined_candidates.setStyleSheet("""
-            QListWidget::item { 
+        self.predefined_candidates.setStyleSheet(f"""
+            QListWidget::item {{ 
                 border: 1px solid gray; 
                 padding: 2px; 
                 margin: 1px; 
-                height: 15px; 
-            }
+                height: {item_height}px; 
+            }}
         """)
-        self.predefined_candidates.setFixedHeight(100)  # 高さを小さく
+        self.predefined_candidates.setFixedHeight(100)
         self.predefined_candidates.setMinimumWidth(150)
 
-        # 事前登録ワードを追加
         for word in self.settings.get_search_words():
             self.predefined_candidates.addItem(word)
         
-        # 横並びレイアウトに追加
         word_blocks_layout.addWidget(QLabel("メタデータ一致ワード:"))
         word_blocks_layout.addWidget(self.metadata_candidates)
         word_blocks_layout.addWidget(QLabel("事前登録ワード:"))
@@ -77,7 +76,6 @@ class WordBlocks(QWidget):
         self.sequence_button.clicked.connect(self.add_sequence)
         self.sequence_position = QCheckBox("先頭に追加")
         
-        # 全体のレイアウトに追加
         self.layout.addLayout(word_blocks_layout)
         self.layout.addWidget(QLabel("リネームパターン:"))
         self.layout.addWidget(self.template_combo)
