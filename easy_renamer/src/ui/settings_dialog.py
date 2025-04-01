@@ -1,14 +1,16 @@
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLineEdit, QPushButton, QFormLayout, QListWidget, QHBoxLayout, QLabel
+from PyQt5.QtCore import pyqtSignal
 from core.settings import Settings
 
 class SettingsDialog(QDialog):
+    settings_updated = pyqtSignal()  # シグナルを追加
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("設定")
         self.settings = Settings()
         self.layout = QVBoxLayout(self)
         
-        # 定型文設定
         self.template_list = QListWidget()
         self.template_input = QLineEdit()
         self.template_add_button = QPushButton("追加")
@@ -27,7 +29,6 @@ class SettingsDialog(QDialog):
         template_buttons.addWidget(self.template_remove_button)
         template_layout.addLayout(template_buttons)
         
-        # 検索用ワード設定
         self.search_list = QListWidget()
         self.search_input = QLineEdit()
         self.search_add_button = QPushButton("追加")
@@ -46,11 +47,10 @@ class SettingsDialog(QDialog):
         search_buttons.addWidget(self.search_remove_button)
         search_layout.addLayout(search_buttons)
         
-        # メタデータ一致ワード設定
         self.word_map_list = QListWidget()
         self.word_en_input = QLineEdit()
         self.word_jp_input = QLineEdit()
-        self.word_add_button = QPushButton("追加")
+        self.word_add_button = QButton("追加")
         self.word_remove_button = QPushButton("削除")
         self.word_add_button.clicked.connect(self.add_word_map)
         self.word_remove_button.clicked.connect(self.remove_word_map)
@@ -129,4 +129,5 @@ class SettingsDialog(QDialog):
             "word_map": word_map
         }
         self.settings.save_config()
+        self.settings_updated.emit()  # シグナルを発信
         self.accept()
