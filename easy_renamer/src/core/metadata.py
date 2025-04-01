@@ -1,5 +1,6 @@
 from PIL import Image
 import os
+import unicodedata
 from core.settings import Settings
 
 class MetadataParser:
@@ -12,6 +13,16 @@ class MetadataParser:
         self.word_map = self.settings.get_word_map()
         print(f"Updated word_map: {self.word_map}")
     
+    def normalize_string(self, s):
+        """文字列を正規化（ユニコード正規化＋不可視文字除去＋スペース正規化）"""
+        # ユニコード正規化（NFC形式）
+        s = unicodedata.normalize('NFC', s)
+        # 不可視文字や制御文字を除去
+        s = ''.join(c for c in s if unicodedata.category(c) not in ('Cc', 'Cf'))
+        # スペースを正規化
+        s = ' '.join(s.split())
+        return s.strip()
+
     def parse(self, image_path):
         try:
             with Image.open(image_path) as img:
@@ -27,26 +38,15 @@ class MetadataParser:
                         prompt = value[prompt_start:]
                         # カンマ区切りで分割し、改行や余分なスペースを除去
                         prompt_words = [word.strip().replace('\n', ' ').replace('\r', '') for word in prompt.split(',')]
-                        # さらにスペースを正規化
-                        prompt_words = [' '.join(word.split()) for word in prompt_words if word]
+                        # さらに正規化
+                        prompt_words = [self.normalize_string(word) for word in prompt_words if word]
                         print(f"Extracted prompt words: {prompt_words}")
                         for word in prompt_words:
                             for en_word, jp_word in self.word_map.items():
-                                if en_word == word:
+                                normalized_en_word = self.normalize_string(en_word)
+                                if normalized_en_word == word:
                                     translated[en_word] = jp_word
                                 else:
-                                    print(f"No match: '{word}' does not match '{en_word}'")
+                                    print(f"No match: '{word}' ({repr(word)}) does not match '{normalized_en_word}' ({repr(normalized_en_word)})")
             
-            if not translated:
-                filename = os.path.splitext(os.path.basename(image_path))[0].lower()
-                print(f"Extracting from filename: {filename}")
-                words = filename.split()
-                for word in words:
-                    for en_word, jp_word in self.word_map.items():
-                        if en_word in word:
-                            translated[en_word] = jp_word
-            
-            return translated if translated else {"no_match": "一致なし"}
-        except Exception as e:
-            print(f"Error parsing metadata for {image_path}: {e}")
-            return {"error": str(e)}
+            if not translated
