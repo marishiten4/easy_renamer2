@@ -12,7 +12,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Easy Renamer")
-        self.resize(1200, 800)  # ウィンドウの初期サイズを大きく
+        self.resize(1400, 900)  # ウィンドウの初期サイズをさらに大きく
         if os.path.exists("assets/icon.ico"):
             self.setWindowIcon(QIcon("assets/icon.ico"))
         
@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
             self.rename_button.setIcon(QIcon("assets/icon.ico"))
         
         right_layout.addWidget(QLabel("プレビュー:"))
-        right_layout.addWidget(self.preview, 5)  # プレビューのサイズをさらに大きく
+        right_layout.addWidget(self.preview, 7)  # プレビューのサイズをさらに大きく
         right_layout.addWidget(self.word_blocks, 1)
         right_layout.addWidget(self.warning_label)
         right_layout.addWidget(self.folder_button)
@@ -52,51 +52,9 @@ class MainWindow(QMainWindow):
         right_layout.addWidget(self.rename_button)
         
         splitter.addWidget(right_widget)
-        splitter.setSizes([300, 900])  # 右側の領域をさらに広げる
+        splitter.setSizes([300, 1100])  # 右側の領域をさらに広げる
         
         self.folder_button.clicked.connect(self.select_folder)
         self.refresh_button.clicked.connect(self.refresh_metadata)
         self.rename_button.clicked.connect(self.execute_rename)
-        self.settings_button.clicked.connect(self.open_settings)  # ここで open_settings を接続
-        self.image_list.itemClicked.connect(self.update_preview)
-        self.word_blocks.pattern_input.textChanged.connect(self.check_pattern)
-        
-        self.renamer = Renamer()
-
-    def select_folder(self):
-        folder = QFileDialog.getExistingDirectory(self, "フォルダを選択")
-        if folder:
-            self.image_list.load_images(folder)
-    
-    def update_preview(self, item):
-        image_path = item.data(32)
-        self.preview.update_image(image_path)
-        metadata = self.renamer.get_metadata(image_path)
-        print(f"Translated metadata: {metadata}")
-        self.word_blocks.update_candidates(metadata)
-    
-    def refresh_metadata(self):
-        self.renamer.update_word_map()
-        selected_items = self.image_list.list_widget.selectedItems()
-        if selected_items:
-            self.update_preview(selected_items[0])
-        else:
-            print("No selected items to refresh.")
-    
-    def check_pattern(self):
-        pattern = self.word_blocks.get_rename_pattern()
-        char_count = count_fullwidth_chars(pattern)
-        if char_count > 65:
-            self.warning_label.setText("警告: 文字数が65文字を超えています")
-            self.warning_label.setStyleSheet("color: red;")
-        else:
-            self.warning_label.clear()
-    
-    def execute_rename(self):
-        selected_images = self.image_list.selected_images()
-        self.renamer.rename_files(selected_images, self.word_blocks.get_rename_pattern(), self)
-    
-    def open_settings(self):
-        dialog = SettingsDialog(self)
-        dialog.settings_updated.connect(self.refresh_metadata)
-        dialog.exec_()
+        self.settings_button.clicked.connect(self.open_settings)
