@@ -3,7 +3,7 @@ from PyQt5.QtCore import pyqtSignal
 from core.settings import Settings
 
 class SettingsDialog(QDialog):
-    settings_updated = pyqtSignal()  # シグナルを追加
+    settings_updated = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -50,7 +50,7 @@ class SettingsDialog(QDialog):
         self.word_map_list = QListWidget()
         self.word_en_input = QLineEdit()
         self.word_jp_input = QLineEdit()
-        self.word_add_button = QButton("追加")
+        self.word_add_button = QPushButton("追加")  # QButton を QPushButton に修正
         self.word_remove_button = QPushButton("削除")
         self.word_add_button.clicked.connect(self.add_word_map)
         self.word_remove_button.clicked.connect(self.remove_word_map)
@@ -129,5 +129,5 @@ class SettingsDialog(QDialog):
             "word_map": word_map
         }
         self.settings.save_config()
-        self.settings_updated.emit()  # シグナルを発信
+        self.settings_updated.emit()
         self.accept()
