@@ -8,7 +8,6 @@ class Renamer:
         self.metadata_parser = MetadataParser()
     
     def update_word_map(self):
-        """word_mapを更新"""
         self.metadata_parser.update_word_map()
     
     def get_metadata(self, image_path):
