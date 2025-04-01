@@ -44,25 +44,29 @@ class ZoomDialog(QDialog):
             self.image_label.setPixmap(scaled_pixmap)
     
     def zoom_in(self):
-        # 現在のスケールに1.2を掛けた値を計算
+        print(f"Before zoom_in: scale_factor = {self.scale_factor}")  # デバッグ出力
+        # 新しいスケールを計算
         new_scale = self.scale_factor * 1.2
-        # 上限を超えないように制限
+        # 上限チェック
         if new_scale <= self.max_scale:
             self.scale_factor = new_scale
+            print(f"After zoom_in: scale_factor = {self.scale_factor}")
             self.update_display()
         else:
-            self.scale_factor = self.max_scale  # 上限に固定
+            self.scale_factor = self.max_scale
             print(f"Maximum scale reached: {self.scale_factor}")
     
     def zoom_out(self):
-        # 現在のスケールに1.2を割った値を計算
+        print(f"Before zoom_out: scale_factor = {self.scale_factor}")  # デバッグ出力
+        # 新しいスケールを計算
         new_scale = self.scale_factor / 1.2
-        # 下限を下回らないように制限
+        # 下限チェック
         if new_scale >= self.min_scale:
             self.scale_factor = new_scale
+            print(f"After zoom_out: scale_factor = {self.scale_factor}")
             self.update_display()
         else:
-            self.scale_factor = self.min_scale  # 下限に固定
+            self.scale_factor = self.min_scale
             print(f"Minimum scale reached: {self.scale_factor}")
     
     def resizeEvent(self, event):
