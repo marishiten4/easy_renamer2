@@ -35,7 +35,6 @@ class MainWindow(QMainWindow):
         self.settings_button = QPushButton("設定")
         self.rename_button = QPushButton("リネーム実行")
         
-        # アイコンをボタンに設定
         if os.path.exists("assets/icon.ico"):
             self.folder_button.setIcon(QIcon("assets/icon.ico"))
             self.settings_button.setIcon(QIcon("assets/icon.ico"))
@@ -69,6 +68,7 @@ class MainWindow(QMainWindow):
         image_path = item.data(32)
         self.preview.update_image(image_path)
         metadata = self.renamer.get_metadata(image_path)
+        print(f"Translated metadata: {metadata}")  # デバッグ用
         self.word_blocks.update_candidates(metadata)
     
     def check_pattern(self):
