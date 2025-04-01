@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QListWidget, QLineEdit, QVBoxLayout, QWidget, QPushButton, QComboBox, QLabel, QCheckBox, QHBoxLayout
-from PyQt5.QtCore import Qt, QMimeData
+from PyQt5.QtCore import Qt, QMimeData, QSize  # QtCore から QSize をインポート
 from PyQt5.QtGui import QDrag, QFont, QFontMetrics
 from core.settings import Settings
 
@@ -79,7 +79,7 @@ class WordBlocks(QWidget):
             item = list_widget.item(i)
             text = item.text()
             width = font_metrics.width(text) + 6  # パディングを最小限に
-            item.setSizeHint(QtCore.QSize(width, list_widget.height() // 3))
+            item.setSizeHint(QSize(width, list_widget.height() // 3))  # QtCore.QSize を QSize に修正
     
     def update_candidates(self, metadata):
         # メタデータ一致ワードを追加（既存の事前登録ワードの後に）
