@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QListWidget, QLineEdit, QVBoxLayout, QWidget, QPushButton, QComboBox
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QMimeData
+from PyQt5.QtGui import QDrag
 
 class WordBlocks(QWidget):
     def __init__(self):
@@ -15,6 +16,8 @@ class WordBlocks(QWidget):
         # リネームパターン入力
         self.pattern_input = QLineEdit()
         self.pattern_input.setPlaceholderText("例: {定型文}_{ワード1}_{連番}")
+        self.pattern_input.setAcceptDrops(True)
+        self.pattern_input.dropEvent = self.drop_event
         
         # 定型文選択
         self.template_combo = QComboBox()
@@ -25,7 +28,9 @@ class WordBlocks(QWidget):
         self.sequence_button = QPushButton("連番設定")
         self.sequence_button.clicked.connect(self.add_sequence)
         
+        self.layout.addWidget(QLabel("候補ワード:"))
         self.layout.addWidget(self.candidates)
+        self.layout.addWidget(QLabel("リネームパターン:"))
         self.layout.addWidget(self.template_combo)
         self.layout.addWidget(self.pattern_input)
         self.layout.addWidget(self.sequence_button)
@@ -45,8 +50,13 @@ class WordBlocks(QWidget):
             self.pattern_input.setText(f"{template}_{{ワード1}}_{{連番}}")
     
     def add_sequence(self):
-        # 簡易的な連番挿入（後でsettings_dialogで詳細設定）
         self.pattern_input.insert("{連番:03d}")  # 例: 001, 002, ...
+    
+    def drop_event(self, event):
+        data = event.mimeData()
+        if data.hasText():
+            self.pattern_input.insert(data.text().split(": ")[1])
+        event.accept()
     
     def get_rename_pattern(self):
         return self.pattern_input.text()
