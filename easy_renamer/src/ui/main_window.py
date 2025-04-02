@@ -97,7 +97,8 @@ class MainWindow(QMainWindow):
         self.renamer.rename_files(selected_images, self.word_blocks.get_rename_pattern(), self)
     
     def open_settings(self):
+        print("Opening settings dialog...")  # デバッグ出力
         dialog = SettingsDialog(self)
         dialog.settings_updated.connect(self.refresh_metadata)
-        dialog.templates_updated.connect(self.word_blocks.refresh_templates)  # テンプレート更新シグナルを接続
+        dialog.templates_updated.connect(self.word_blocks.refresh_templates)
         dialog.exec_()
