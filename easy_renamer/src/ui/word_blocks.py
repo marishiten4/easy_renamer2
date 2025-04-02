@@ -4,7 +4,6 @@ from PyQt5.QtGui import QDrag, QFont, QFontMetrics
 from core.settings import Settings
 
 class WordBlocks(QWidget):
-    # シグナルを定義（テンプレート更新時に使用）
     templates_updated = pyqtSignal()
 
     def __init__(self):
@@ -12,16 +11,12 @@ class WordBlocks(QWidget):
         self.layout = QVBoxLayout(self)
         self.settings = Settings()
         
-        # ワードブロック全体のレイアウト
         word_blocks_layout = QVBoxLayout()
-
-        # フォント設定
         font = QFont()
         font.setPointSize(8)
         font_metrics = QFontMetrics(font)
         item_height = font_metrics.height() + 4
 
-        # 統合されたワードリスト（メタデータ一致ワードと事前登録ワードを1つに）
         self.word_list = QListWidget()
         self.word_list.setDragEnabled(True)
         self.word_list.setAcceptDrops(True)
@@ -36,20 +31,17 @@ class WordBlocks(QWidget):
                 height: {item_height}px; 
             }}
             QListWidget::item:selected {{ 
-                background-color: #0078d7;  /* 選択時の背景色を青に */
-                color: white;               /* 選択時の文字色を白に */
+                background-color: #0078d7; 
+                color: white; 
             }}
         """)
-        # 横並び表示（左から右へ）
         self.word_list.setFlow(QListWidget.LeftToRight)
-        self.word_list.setWrapping(True)  # 自動折り返しを有効化
-        self.word_list.setFixedHeight(100)  # 高さは適度に
+        self.word_list.setWrapping(True)
+        self.word_list.setFixedHeight(100)
 
-        # 事前登録ワードを追加
         for word in self.settings.get_search_words():
             self.word_list.addItem(word)
         
-        # 横幅を文字数に応じて調整
         self.adjust_item_width(self.word_list)
 
         word_blocks_layout.addWidget(QLabel("使用可能なワード:"))
@@ -79,11 +71,9 @@ class WordBlocks(QWidget):
         self.layout.addWidget(self.sequence_position)
         self.layout.addWidget(self.sequence_button)
 
-        # テンプレート更新時のシグナルを接続
         self.templates_updated.connect(self.refresh_templates)
 
     def adjust_item_width(self, list_widget):
-        """リストウィジェットのアイテムの幅を文字数に応じて調整"""
         font_metrics = QFontMetrics(list_widget.font())
         for i in range(list_widget.count()):
             item = list_widget.item(i)
@@ -93,32 +83,36 @@ class WordBlocks(QWidget):
             item.setSizeHint(QSize(width, height))
     
     def update_candidates(self, metadata):
-        # 現在のワードリストを取得
+        print(f"Received metadata: {metadata}")  # デバッグ出力
         current_words = set()
         for i in range(self.word_list.count()):
             current_words.add(self.word_list.item(i).text())
         
-        # 事前登録ワードを取得
         predefined_words = set(self.settings.get_search_words())
+        print(f"Predefined words: {predefined_words}")  # デバッグ出力
         
-        # ワードリストをクリアして事前登録ワードを再追加
         self.word_list.clear()
         for word in predefined_words:
-            if word:  # 空の事前登録ワードを除外
+            if word and word.strip():  # 空の事前登録ワードを除外
                 self.word_list.addItem(word)
         
-        # メタデータ一致ワードを追加（空やNoneを厳密に除外）
         metadata_words = set()
         for value in metadata.values():
-            if value and isinstance(value, str) and value.strip() and value != "None":  # 空、None、"None"文字列を除外
+            # 空、None、"None"文字列、空白のみを除外
+            if (value and 
+                isinstance(value, str) and 
+                value.strip() and 
+                value != "None" and 
+                not value.isspace() and 
+                value.lower() not in ["", "none", "null", "n/a"]):
                 metadata_words.add(value.strip())
         
-        # メタデータ一致ワードを追加（重複しないように）
+        print(f"Filtered metadata words: {metadata_words}")  # デバッグ出力
+        
         for value in metadata_words:
             if value not in predefined_words and value not in current_words:
                 self.word_list.addItem(value)
         
-        # 横幅を再調整
         self.adjust_item_width(self.word_list)
     
     def insert_candidate(self, index):
@@ -134,7 +128,7 @@ class WordBlocks(QWidget):
     
     def add_sequence(self):
         sequence = self.sequence_input.text() or "連番:03d"
-        sequence_text = sequence  # {} を追加しない
+        sequence_text = sequence
         if self.sequence_position.isChecked():
             current_text = self.pattern_input.text()
             self.pattern_input.setText(f"{sequence_text} {current_text}".strip())
@@ -151,6 +145,8 @@ class WordBlocks(QWidget):
         return self.pattern_input.text().strip()
     
     def refresh_templates(self):
-        """テンプレートリストを更新"""
+        print("Refreshing templates...")  # デバッグ出力
         self.template_combo.clear()
-        self.template_combo.addItems(self.settings.get_templates())
+        templates = self.settings.get_templates()
+        print(f"Loaded templates for combo: {templates}")  # デバッグ出力
+        self.template_combo.addItems(templates)
