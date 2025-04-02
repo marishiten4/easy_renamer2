@@ -155,5 +155,7 @@ class SettingsDialog(QDialog):
         print(f"Saving settings: {self.settings.config}")  # デバッグ出力
         self.settings.save_config()
         self.settings_updated.emit()
+        print("Emitted settings_updated signal")  # デバッグ出力
         self.templates_updated.emit()
+        print("Emitted templates_updated signal")  # デバッグ出力
         self.accept()
