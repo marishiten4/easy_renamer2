@@ -12,12 +12,14 @@ class SettingsDialog(QDialog):
         self.settings = Settings()
         self.layout = QVBoxLayout(self)
         
+        # テンプレート設定
         self.template_list = QListWidget()
         self.template_input = QLineEdit()
         self.template_add_button = QPushButton("追加")
         self.template_remove_button = QPushButton("削除")
         self.template_add_button.clicked.connect(self.add_template)
         self.template_remove_button.clicked.connect(self.remove_template)
+        self.template_list.doubleClicked.connect(self.copy_template_to_input)  # ダブルクリックでコピー
         for template in self.settings.get_templates():
             self.template_list.addItem(template)
         
@@ -30,12 +32,14 @@ class SettingsDialog(QDialog):
         template_buttons.addWidget(self.template_remove_button)
         template_layout.addLayout(template_buttons)
         
+        # 検索用ワード設定
         self.search_list = QListWidget()
         self.search_input = QLineEdit()
         self.search_add_button = QPushButton("追加")
         self.search_remove_button = QPushButton("削除")
         self.search_add_button.clicked.connect(self.add_search_word)
         self.search_remove_button.clicked.connect(self.remove_search_word)
+        self.search_list.doubleClicked.connect(self.copy_search_word_to_input)  # ダブルクリックでコピー
         for word in self.settings.get_search_words():
             self.search_list.addItem(word)
         
@@ -48,6 +52,7 @@ class SettingsDialog(QDialog):
         search_buttons.addWidget(self.search_remove_button)
         search_layout.addLayout(search_buttons)
         
+        # メタデータ一致ワード設定
         self.word_map_list = QListWidget()
         self.word_en_input = QLineEdit()
         self.word_jp_input = QLineEdit()
@@ -55,6 +60,7 @@ class SettingsDialog(QDialog):
         self.word_remove_button = QPushButton("削除")
         self.word_add_button.clicked.connect(self.add_word_map)
         self.word_remove_button.clicked.connect(self.remove_word_map)
+        self.word_map_list.doubleClicked.connect(self.copy_word_map_to_input)  # ダブルクリックでコピー
         for en, jp in self.settings.get_word_map().items():
             self.word_map_list.addItem(f"{en}: {jp}")
         
@@ -91,6 +97,11 @@ class SettingsDialog(QDialog):
         if selected:
             self.template_list.takeItem(self.template_list.row(selected))
     
+    def copy_template_to_input(self):
+        selected = self.template_list.currentItem()
+        if selected:
+            self.template_input.setText(selected.text())
+    
     def add_search_word(self):
         word = self.search_input.text()
         if word:
@@ -101,6 +112,11 @@ class SettingsDialog(QDialog):
         selected = self.search_list.currentItem()
         if selected:
             self.search_list.takeItem(self.search_list.row(selected))
+    
+    def copy_search_word_to_input(self):
+        selected = self.search_list.currentItem()
+        if selected:
+            self.search_input.setText(selected.text())
     
     def add_word_map(self):
         en = self.word_en_input.text()
@@ -114,6 +130,13 @@ class SettingsDialog(QDialog):
         selected = self.word_map_list.currentItem()
         if selected:
             self.word_map_list.takeItem(self.word_map_list.row(selected))
+    
+    def copy_word_map_to_input(self):
+        selected = self.word_map_list.currentItem()
+        if selected:
+            en, jp = selected.text().split(": ", 1)
+            self.word_en_input.setText(en)
+            self.word_jp_input.setText(jp)
     
     def save_settings(self):
         templates = [self.template_list.item(i).text() for i in range(self.template_list.count())]
@@ -131,4 +154,5 @@ class SettingsDialog(QDialog):
         }
         self.settings.save_config()
         self.settings_updated.emit()
+        self.templates_updated.emit()  # テンプレート更新シグナルを発信
         self.accept()
