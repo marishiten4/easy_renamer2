@@ -19,7 +19,7 @@ class SettingsDialog(QDialog):
         self.template_remove_button = QPushButton("削除")
         self.template_add_button.clicked.connect(self.add_template)
         self.template_remove_button.clicked.connect(self.remove_template)
-        self.template_list.doubleClicked.connect(self.copy_template_to_input)  # ダブルクリックでコピー
+        self.template_list.doubleClicked.connect(self.copy_template_to_input)
         for template in self.settings.get_templates():
             self.template_list.addItem(template)
         
@@ -39,7 +39,7 @@ class SettingsDialog(QDialog):
         self.search_remove_button = QPushButton("削除")
         self.search_add_button.clicked.connect(self.add_search_word)
         self.search_remove_button.clicked.connect(self.remove_search_word)
-        self.search_list.doubleClicked.connect(self.copy_search_word_to_input)  # ダブルクリックでコピー
+        self.search_list.doubleClicked.connect(self.copy_search_word_to_input)
         for word in self.settings.get_search_words():
             self.search_list.addItem(word)
         
@@ -60,7 +60,7 @@ class SettingsDialog(QDialog):
         self.word_remove_button = QPushButton("削除")
         self.word_add_button.clicked.connect(self.add_word_map)
         self.word_remove_button.clicked.connect(self.remove_word_map)
-        self.word_map_list.doubleClicked.connect(self.copy_word_map_to_input)  # ダブルクリックでコピー
+        self.word_map_list.doubleClicked.connect(self.copy_word_map_to_input)
         for en, jp in self.settings.get_word_map().items():
             self.word_map_list.addItem(f"{en}: {jp}")
         
@@ -152,7 +152,8 @@ class SettingsDialog(QDialog):
             "search_words": search_words,
             "word_map": word_map
         }
+        print(f"Saving settings: {self.settings.config}")  # デバッグ出力
         self.settings.save_config()
         self.settings_updated.emit()
-        self.templates_updated.emit()  # テンプレート更新シグナルを発信
+        self.templates_updated.emit()
         self.accept()
