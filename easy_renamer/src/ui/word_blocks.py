@@ -1,3 +1,5 @@
+# src/ui/word_blocks.py
+
 from PyQt5.QtWidgets import QListWidget, QLineEdit, QVBoxLayout, QWidget, QPushButton, QComboBox, QLabel, QCheckBox, QHBoxLayout
 from PyQt5.QtCore import Qt, QMimeData, QSize, pyqtSignal
 from PyQt5.QtGui import QDrag, QFont, QFontMetrics
@@ -82,6 +84,12 @@ class WordBlocks(QWidget):
             height = font_metrics.height() + 8
             item.setSizeHint(QSize(width, height))
     
+    def normalize_string(self, s):
+        """文字列を正規化（空白削除、大文字小文字統一）"""
+        if s and isinstance(s, str):
+            return s.strip().lower()
+        return ""
+
     def update_candidates(self, metadata):
         print(f"Received metadata: {metadata}")  # デバッグ出力
         current_words = set()
@@ -98,13 +106,10 @@ class WordBlocks(QWidget):
         
         metadata_words = set()
         for value in metadata.values():
-            # 空、None、"None"文字列、空白のみを除外
-            if (value and 
-                isinstance(value, str) and 
-                value.strip() and 
-                value != "None" and 
-                not value.isspace() and 
-                value.lower() not in ["", "none", "null", "n/a"]):
+            # 空、None、"None"文字列、空白のみ、"No match"を除外
+            normalized_value = self.normalize_string(value)
+            if (normalized_value and 
+                normalized_value not in ["", "none", "null", "n/a", "no match"]):
                 metadata_words.add(value.strip())
         
         print(f"Filtered metadata words: {metadata_words}")  # デバッグ出力
@@ -149,4 +154,6 @@ class WordBlocks(QWidget):
         self.template_combo.clear()
         templates = self.settings.get_templates()
         print(f"Loaded templates for combo: {templates}")  # デバッグ出力
+        if not templates:
+            print("Warning: No templates loaded. Check settings.")  # デバッグ出力
         self.template_combo.addItems(templates)
