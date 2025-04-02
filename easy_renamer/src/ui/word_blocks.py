@@ -104,12 +104,13 @@ class WordBlocks(QWidget):
         # ワードリストをクリアして事前登録ワードを再追加
         self.word_list.clear()
         for word in predefined_words:
-            self.word_list.addItem(word)
+            if word:  # 空の事前登録ワードを除外
+                self.word_list.addItem(word)
         
-        # メタデータ一致ワードを追加（空やNoneを除外、重複を防ぐ）
+        # メタデータ一致ワードを追加（空やNoneを厳密に除外）
         metadata_words = set()
         for value in metadata.values():
-            if value and isinstance(value, str) and value.strip():  # 空やNoneを除外
+            if value and isinstance(value, str) and value.strip() and value != "None":  # 空、None、"None"文字列を除外
                 metadata_words.add(value.strip())
         
         # メタデータ一致ワードを追加（重複しないように）
