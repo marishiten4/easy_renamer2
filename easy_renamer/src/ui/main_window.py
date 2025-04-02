@@ -1,103 +1,134 @@
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QLabel, QSplitter
-from PyQt5.QtGui import QPalette, QColor, QIcon
-from ui.image_list import ImageList
-from ui.preview import Preview
-from ui.word_blocks import WordBlocks
-from ui.settings_dialog import SettingsDialog
-from core.renamer import Renamer
-from utils.helpers import count_fullwidth_chars
-import os
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLineEdit, QPushButton, QFormLayout, QListWidget, QHBoxLayout, QLabel
+from PyQt5.QtCore import pyqtSignal
+from core.settings import Settings
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Easy Renamer")
-        self.resize(1400, 900)
-        if os.path.exists("assets/icon.ico"):
-            self.setWindowIcon(QIcon("assets/icon.ico"))
-        
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-        self.main_layout = QHBoxLayout(self.central_widget)
-        
-        splitter = QSplitter()
-        self.main_layout.addWidget(splitter)
-        
-        self.image_list = ImageList()
-        splitter.addWidget(self.image_list)
-        
-        right_widget = QWidget()
-        right_layout = QVBoxLayout(right_widget)
-        self.preview = Preview()
-        self.word_blocks = WordBlocks()
-        self.warning_label = QLabel("")
-        self.folder_button = QPushButton("フォルダ選択")
-        self.refresh_button = QPushButton("再読み込み")
-        self.settings_button = QPushButton("設定")
-        self.rename_button = QPushButton("リネーム実行")
-        
-        if os.path.exists("assets/icon.ico"):
-            self.folder_button.setIcon(QIcon("assets/icon.ico"))
-            self.refresh_button.setIcon(QIcon("assets/icon.ico"))
-            self.settings_button.setIcon(QIcon("assets/icon.ico"))
-            self.rename_button.setIcon(QIcon("assets/icon.ico"))
-        
-        right_layout.addWidget(QLabel("プレビュー:"))
-        right_layout.addWidget(self.preview, 7)
-        right_layout.addWidget(self.word_blocks, 1)
-        right_layout.addWidget(self.warning_label)
-        right_layout.addWidget(self.folder_button)
-        right_layout.addWidget(self.refresh_button)
-        right_layout.addWidget(self.settings_button)
-        right_layout.addWidget(self.rename_button)
-        
-        splitter.addWidget(right_widget)
-        splitter.setSizes([300, 1100])
-        
-        self.folder_button.clicked.connect(self.select_folder)
-        self.refresh_button.clicked.connect(self.refresh_metadata)
-        self.rename_button.clicked.connect(self.execute_rename)
-        self.settings_button.clicked.connect(self.open_settings)
-        self.image_list.itemClicked.connect(self.update_preview)
-        self.word_blocks.pattern_input.textChanged.connect(self.check_pattern)
-        
-        self.renamer = Renamer()
+class SettingsDialog(QDialog):
+    settings_updated = pyqtSignal()
+    templates_updated = pyqtSignal()  # テンプレート更新用のシグナル
 
-    def select_folder(self):
-        folder = QFileDialog.getExistingDirectory(self, "フォルダを選択")
-        if folder:
-            self.image_list.load_images(folder)
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("設定")
+        self.settings = Settings()
+        self.layout = QVBoxLayout(self)
+        
+        self.template_list = QListWidget()
+        self.template_input = QLineEdit()
+        self.template_add_button = QPushButton("追加")
+        self.template_remove_button = QPushButton("削除")
+        self.template_add_button.clicked.connect(self.add_template)
+        self.template_remove_button.clicked.connect(self.remove_template)
+        for template in self.settings.get_templates():
+            self.template_list.addItem(template)
+        
+        template_layout = QVBoxLayout()
+        template_buttons = QHBoxLayout()
+        template_layout.addWidget(QLabel("定型文:"))
+        template_layout.addWidget(self.template_list)
+        template_layout.addWidget(self.template_input)
+        template_buttons.addWidget(self.template_add_button)
+        template_buttons.addWidget(self.template_remove_button)
+        template_layout.addLayout(template_buttons)
+        
+        self.search_list = QListWidget()
+        self.search_input = QLineEdit()
+        self.search_add_button = QPushButton("追加")
+        self.search_remove_button = QPushButton("削除")
+        self.search_add_button.clicked.connect(self.add_search_word)
+        self.search_remove_button.clicked.connect(self.remove_search_word)
+        for word in self.settings.get_search_words():
+            self.search_list.addItem(word)
+        
+        search_layout = QVBoxLayout()
+        search_buttons = QHBoxLayout()
+        search_layout.addWidget(QLabel("検索用ワード:"))
+        search_layout.addWidget(self.search_list)
+        search_layout.addWidget(self.search_input)
+        search_buttons.addWidget(self.search_add_button)
+        search_buttons.addWidget(self.search_remove_button)
+        search_layout.addLayout(search_buttons)
+        
+        self.word_map_list = QListWidget()
+        self.word_en_input = QLineEdit()
+        self.word_jp_input = QLineEdit()
+        self.word_add_button = QPushButton("追加")
+        self.word_remove_button = QPushButton("削除")
+        self.word_add_button.clicked.connect(self.add_word_map)
+        self.word_remove_button.clicked.connect(self.remove_word_map)
+        for en, jp in self.settings.get_word_map().items():
+            self.word_map_list.addItem(f"{en}: {jp}")
+        
+        word_map_layout = QVBoxLayout()
+        word_map_buttons = QHBoxLayout()
+        word_map_layout.addWidget(QLabel("メタデータ一致ワード:"))
+        word_map_layout.addWidget(self.word_map_list)
+        word_map_inputs = QHBoxLayout()
+        word_map_inputs.addWidget(QLabel("英語:"))
+        word_map_inputs.addWidget(self.word_en_input)
+        word_map_inputs.addWidget(QLabel("日本語:"))
+        word_map_inputs.addWidget(self.word_jp_input)
+        word_map_layout.addLayout(word_map_inputs)
+        word_map_buttons.addWidget(self.word_add_button)
+        word_map_buttons.addWidget(self.word_remove_button)
+        word_map_layout.addLayout(word_map_buttons)
+        
+        self.save_button = QPushButton("保存")
+        self.save_button.clicked.connect(self.save_settings)
+        
+        self.layout.addLayout(template_layout)
+        self.layout.addLayout(search_layout)
+        self.layout.addLayout(word_map_layout)
+        self.layout.addWidget(self.save_button)
     
-    def update_preview(self, item):
-        image_path = item.data(32)
-        self.preview.update_image(image_path)
-        metadata = self.renamer.get_metadata(image_path)
-        print(f"Translated metadata: {metadata}")
-        self.word_blocks.update_candidates(metadata)
+    def add_template(self):
+        template = self.template_input.text()
+        if template:
+            self.template_list.addItem(template)
+            self.template_input.clear()
     
-    def refresh_metadata(self):
-        self.renamer.update_word_map()
-        selected_items = self.image_list.list_widget.selectedItems()
-        if selected_items:
-            self.update_preview(selected_items[0])
-        else:
-            print("No selected items to refresh.")
+    def remove_template(self):
+        selected = self.template_list.currentItem()
+        if selected:
+            self.template_list.takeItem(self.template_list.row(selected))
     
-    def check_pattern(self):
-        pattern = self.word_blocks.get_rename_pattern()
-        char_count = count_fullwidth_chars(pattern)
-        if char_count > 65:
-            self.warning_label.setText("警告: 文字数が65文字を超えています")
-            self.warning_label.setStyleSheet("color: red;")
-        else:
-            self.warning_label.clear()
+    def add_search_word(self):
+        word = self.search_input.text()
+        if word:
+            self.search_list.addItem(word)
+            self.search_input.clear()
     
-    def execute_rename(self):
-        selected_images = self.image_list.selected_images()
-        self.renamer.rename_files(selected_images, self.word_blocks.get_rename_pattern(), self)
+    def remove_search_word(self):
+        selected = self.search_list.currentItem()
+        if selected:
+            self.search_list.takeItem(self.search_list.row(selected))
     
-    def open_settings(self):
-        dialog = SettingsDialog(self)
-        dialog.settings_updated.connect(self.refresh_metadata)
-        dialog.templates_updated.connect(self.word_blocks.refresh_templates)  # テンプレート更新シグナルを接続
-        dialog.exec_()
+    def add_word_map(self):
+        en = self.word_en_input.text()
+        jp = self.word_jp_input.text()
+        if en and jp:
+            self.word_map_list.addItem(f"{en}: {jp}")
+            self.word_en_input.clear()
+            self.word_jp_input.clear()
+    
+    def remove_word_map(self):
+        selected = self.word_map_list.currentItem()
+        if selected:
+            self.word_map_list.takeItem(self.word_map_list.row(selected))
+    
+    def save_settings(self):
+        templates = [self.template_list.item(i).text() for i in range(self.template_list.count())]
+        search_words = [self.search_list.item(i).text() for i in range(self.search_list.count())]
+        word_map = {}
+        for i in range(self.word_map_list.count()):
+            item = self.word_map_list.item(i).text()
+            en, jp = item.split(": ", 1)
+            word_map[en] = jp
+        
+        self.settings.config = {
+            "templates": templates,
+            "search_words": search_words,
+            "word_map": word_map
+        }
+        self.settings.save_config()
+        self.settings_updated.emit()
+        self.accept()
