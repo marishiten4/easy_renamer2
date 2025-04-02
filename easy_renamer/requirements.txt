@@ -1,7 +1,0 @@
-PyQt5==5.15.9
-PyQt6==6.5.0
-pillow==10.2.0 # 画像処理用
-exifread==3.0.0  # 画像メタデータ解析用
-pyinstaller==6.5.0  # EXE化用
-piexif==1.1.3
-pandas==2.2.0
